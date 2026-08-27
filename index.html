@@ -6,25 +6,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#fcfcfa;--soft:#f2f1eb;--line:#eceae3;--muted:#9a9993;--ink:#141412;--ink2:#5a5a57}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,sans-serif}
 .top{position:sticky;top:0;z-index:20;background:rgba(252,252,250,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;padding:12px 18px}
-.btn{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
-.btn:hover{border-color:#d6d3cb;transform:translateY(-1px)}.btn-dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer}
+.btn-dark{background:var(--ink);color:#fff;border-color:var(--ink)}
 .mono{font-family:JetBrains Mono,monospace}.small-caps{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:18px;padding:22px 18px}
-.card{cursor:pointer;transition:.2s}.card:hover{transform:translateY(-2px)}.cover{width:100%;aspect-ratio:3/4.2;object-fit:cover;border-radius:18px;background:var(--soft);border:1px solid var(--line);box-shadow:0 4px 20px rgba(0,0,0,.04)}
-.sheet{position:fixed;inset:0;z-index:30;display:none}.sheet.open{display:block}
-.sheet-bg{position:absolute;inset:0;background:rgba(20,20,18,.18);backdrop-filter:blur(6px)}
-.sheet-panel{position:absolute;left:0;top:0;bottom:0;width:300px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;box-shadow:12px 0 40px rgba(0,0,0,.06)}
+.cover{width:100%;aspect-ratio:3/4.2;object-fit:cover;border-radius:18px;background:var(--soft);border:1px solid var(--line)}
+.sheet{position:fixed;inset:0;z-index:30;display:none}.sheet.open{display:block}.sheet-bg{position:absolute;inset:0;background:rgba(20,20,18,.18);backdrop-filter:blur(6px)}
+.sheet-panel{position:absolute;left:0;top:0;bottom:0;width:300px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column}
 .drawer-head{padding:22px 20px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
-.drawer-logo{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
-.nav-label{padding:8px 10px 6px;margin-top:8px}.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid transparent;background:transparent;text-align:left;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink2);transition:.15s}
-.nav-item:hover{background:var(--soft);border-color:var(--line);color:var(--ink)}.nav-item.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.nav-count{margin-left:auto;font-size:11px;background:var(--soft);border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--muted)}
+.drawer-logo{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid transparent;background:transparent;text-align:left;cursor:pointer;font-size:13.5px;color:var(--ink2)}
+.nav-item.active{background:var(--ink);color:#fff}.nav-count{margin-left:auto;font-size:11px;background:var(--soft);border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--muted)}
 .drawer-foot{padding:14px 16px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
 .detail{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;overflow:auto}.detail.open{display:block}
 .modal{position:fixed;inset:0;z-index:50;background:rgba(20,20,18,.22);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}
-.box{background:#fff;border-radius:22px;border:1px solid var(--line);width:100%;max-width:520px;padding:18px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.12)}
+.box{background:#fff;border-radius:22px;border:1px solid var(--line);width:100%;max-width:520px;padding:18px;max-height:90vh;overflow:auto}
 .input{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--soft);margin-top:6px;font-family:Inter}
 .drop{border:1.5px dashed var(--line);border-radius:16px;padding:18px;text-align:center;background:var(--soft);cursor:pointer;margin-top:10px}
 .resCard{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-top:10px;cursor:pointer}
@@ -41,12 +39,12 @@
 <div id="drawer" class="sheet">
 <div class="sheet-bg" onclick="drawer.classList.remove('open')"></div>
 <div class="sheet-panel">
-<div class="drawer-head"><div class="drawer-logo">A</div><div><b style="font-size:14px">Archive</b><div class="mono small-caps" style="margin-top:2px">Personal library</div></div><button class="btn" onclick="drawer.classList.remove('open')" style="margin-left:auto;width:30px;height:30px;padding:0">✕</button></div>
+<div class="drawer-head"><div class="drawer-logo">A</div><div><b>Archive</b><div class="mono small-caps">Personal library</div></div><button class="btn" onclick="drawer.classList.remove('open')" style="margin-left:auto;width:30px;height:30px;padding:0">✕</button></div>
 <div style="flex:1;overflow:auto;padding:16px 12px">
-<div class="nav-label small-caps">Library</div>
 <button class="nav-item active" id="nav-All" onclick="setActive('All')">◍ All <span class="nav-count" id="count-All">0</span></button>
 <button class="nav-item" id="nav-Books" onclick="setActive('Books')">📚 Books <span class="nav-count" id="count-Books">0</span></button>
 <button class="nav-item" id="nav-Manga" onclick="setActive('Manga')">⛩️ Manga <span class="nav-count" id="count-Manga">0</span></button>
+<button class="nav-item" id="nav-Films" onclick="setActive('Films')">🎬 Films <span class="nav-count" id="count-Films">0</span></button>
 <button class="nav-item" id="nav-Novel" onclick="setActive('Novel')">📖 Novel <span class="nav-count" id="count-Novel">0</span></button>
 <button class="nav-item" id="nav-Manwha" onclick="setActive('Manwha')">🎨 Manwha <span class="nav-count" id="count-Manwha">0</span></button>
 </div>
@@ -59,10 +57,9 @@
 <div style="flex:1;min-width:220px">
 <h2 id="dTitle" style="margin:0"></h2><div id="dMeta" class="mono small-caps" style="margin-top:6px"></div>
 <p id="dDesc" style="color:#444;font-size:14px;line-height:1.5"></p>
-<div id="dTags" class="mono small-caps"></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
 <button id="readBtn" class="btn btn-dark" onclick="readBook()" style="display:none">📄 Read PDF</button>
-<button id="readOnlineBtn" class="btn" style="display:none;background:#fff;border:1px solid var(--line)" onclick="openExternal()">🌐 Read Online ↗</button>
+<button id="readOnlineBtn" class="btn" style="display:none;background:#fff" onclick="openExternal()">🌐 Read Online ↗</button>
 <button id="readMangaBtn" class="btn btn-dark" style="display:none" onclick="openMangaReader()">📖 Read Chapters</button>
 </div>
 <input id="dLink" class="input" placeholder="External link" style="margin-top:12px">
@@ -70,11 +67,22 @@
 
 <div id="addModal" class="modal" onclick="if(event.target===this) this.classList.remove('open')">
 <div class="box">
-<div style="display:flex;justify-content:space-between"><b>Add</b><button class="btn" onclick="addModal.classList.remove('open')">✕</button></div>
-<select id="fSection" class="input"><option>Books</option><option>Manga</option><option>Novel</option><option>Manwha</option></select>
-<select id="fType" class="input" style="margin-top:8px"><option>Book</option><option>Manga</option><option>Novel</option></select>
-<input id="fTitle" class="input" placeholder="Title - type villain bl">
-<div style="display:flex;gap:8px;margin-top:8px"><input id="fYear" class="input" placeholder="Year" style="flex:1"><button id="fetchBtn" class="btn btn-dark" style="flex:1">🔍 Search Google</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><b>Add new item</b><button class="btn" onclick="addModal.classList.remove('open')">✕</button></div>
+
+<!-- TITLE -->
+<div style="margin-top:14px"><div class="mono small-caps">Title to search</div>
+<input id="fTitle" class="input" placeholder="Ex: Leviticus, villain bl, Dune..."></div>
+
+<!-- SECTION BELOW SEARCH - CLEAR -->
+<div style="margin-top:10px"><div class="mono small-caps">Search as — section</div>
+<select id="fSection" class="input" style="background:#fff;border:1.5px solid #111;font-weight:600">
+<option>Books</option><option>Manga</option><option>Films</option><option>Novel</option><option>Manwha</option>
+</select>
+<div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">☝️ Change this, search mode changes automatically. Films = film DB, Manga = manga DB, Books = Open Library.</div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:12px"><input id="fYear" class="input" placeholder="Year" style="flex:1"><button id="fetchBtn" class="btn btn-dark" style="flex:1">🔍 Search</button></div>
+
 <div id="drop" class="drop" onclick="document.getElementById('filePick').click()"><div id="dropTxt">Drop cover or click</div><div id="preview" style="display:none"><img id="previewImg" style="width:100%;border-radius:12px"></div></div><input type="file" id="filePick" hidden accept="image/*,application/pdf" onchange="handleFile(this.files[0])">
 <textarea id="fDesc" class="input" placeholder="Description" rows="3"></textarea>
 <input id="fLink" class="input" placeholder="Link (optional)">
@@ -100,24 +108,18 @@ let books=[]; let active='All'; let search=''; let DB; const STORE='books';
 function dbOpen(){return new Promise(res=>{const r=indexedDB.open('archive',1); r.onupgradeneeded=()=>{r.result.createObjectStore(STORE,{keyPath:'id'})}; r.onsuccess=()=>{DB=r.result; res()}})}
 function dbPut(s,v){return new Promise(r=>{const t=DB.transaction(s,'readwrite'); t.objectStore(s).put(v); t.oncomplete=()=>r()})}
 function dbGetAll(){return new Promise(r=>{const t=DB.transaction(STORE,'readonly'); const req=t.objectStore(STORE).getAll(); req.onsuccess=()=>r(req.result||[])})}
-function fmt(n){if(!n) return ''; const u=['B','KB','MB','GB']; let i=0; while(n>=1024&&i<u.length-1){n/=1024;i++;} return n.toFixed(1)+u[i]}
 function setActive(a){active=a; currentLabel.textContent=a.toUpperCase()+' • LIBRARY'; drawer.classList.remove('open'); render()}
 function onSearch(v){search=v.toLowerCase(); render()}
 function render(){
   const g=document.getElementById('grid'); g.innerHTML=''; let list=books.slice();
-  const counts={All:books.length, Books:books.filter(b=>b.section==='Books').length, Manga:books.filter(b=>b.section==='Manga').length, Novel:books.filter(b=>b.section==='Novel').length, Manwha:books.filter(b=>b.section==='Manwha').length};
+  const counts={All:books.length, Books:books.filter(b=>b.section==='Books').length, Manga:books.filter(b=>b.section==='Manga').length, Films:books.filter(b=>b.section==='Films').length, Novel:books.filter(b=>b.section==='Novel').length, Manwha:books.filter(b=>b.section==='Manwha').length};
   Object.keys(counts).forEach(k=>{ const el=document.getElementById('count-'+k); if(el) el.textContent=counts[k]; });
-  document.getElementById('totalCount').textContent=`${counts.All} items`;
+  totalCount.textContent=`${counts.All} items`;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); const an=document.getElementById('nav-'+active); if(an) an.classList.add('active');
   if(active!=='All') list=list.filter(b=>b.section===active);
   if(search) list=list.filter(b=>(b.title+' '+(b.description||'')).toLowerCase().includes(search));
-  if(!list.length){ g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted)"><div style="font-size:44px;opacity:.6">📚</div><div class="mono small-caps" style="margin-top:14px">No books in ${active}</div><button class="btn btn-dark" style="margin-top:16px" onclick="openAdd()">+ Add</button></div>`; return; }
-  list.forEach(b=>{
-    const d=document.createElement('div'); d.className='card'; d.onclick=()=>openDetail(b.id);
-    const badge=b.file?'<span style="background:#111;color:#fff;font-size:10px;padding:4px 8px;border-radius:999px;position:absolute;top:10px;left:10px">PDF</span>':'<span style="background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border:1px solid var(--line);font-size:10px;padding:4px 8px;border-radius:999px;position:absolute;top:10px;left:10px">COVER</span>';
-    d.innerHTML=`<div style="position:relative"><img class="cover" src="${b.cover||''}">${badge}</div><div style="margin-top:10px;font-weight:600;font-size:14px;line-height:1.25">${b.title}</div><div class="mono small-caps" style="margin-top:4px">${b.section} · ${b.year||'—'}</div>`;
-    g.appendChild(d);
-  });
+  if(!list.length){ g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted)"><div style="font-size:44px">📚</div><div class="mono small-caps" style="margin-top:14px">No books in ${active}</div><button class="btn btn-dark" style="margin-top:16px" onclick="openAdd()">+ Add</button></div>`; return; }
+  list.forEach(b=>{ const d=document.createElement('div'); d.className='card'; d.onclick=()=>openDetail(b.id); d.innerHTML=`<div style="position:relative"><img class="cover" src="${b.cover||''}"><span style="background:rgba(255,255,255,.9);border:1px solid var(--line);font-size:10px;padding:4px 8px;border-radius:999px;position:absolute;top:10px;left:10px">${b.section}</span></div><div style="margin-top:10px;font-weight:600;font-size:14px">${b.title}</div><div class="mono small-caps" style="margin-top:4px">${b.section} · ${b.year||'—'}</div>`; g.appendChild(d); });
 }
 function openDetail(id){
   const b=books.find(x=>x.id===id); if(!b) return;
@@ -125,126 +127,47 @@ function openDetail(id){
   const isUploaded = b.file || (b.cover||'').startsWith('data:');
   readBtn.style.display=isUploaded?'block':'none'; readOnlineBtn.style.display=isUploaded?'none':'block';
   readMangaBtn.style.display=(!isUploaded && b.section==='Manga' && b.sourceId)?'block':'none';
-  if(!isUploaded &&!b.description) dDesc.innerHTML=`<span style="color:#999;font-size:13px">Cover only — no file (copyright). From ${b.source||'Search'}. Use Read Online / Chapters.</span>`;
   detailPage.classList.add('open');
 }
-function openAdd(){ addModal.classList.add('open'); fSection.value=active==='All'?'Manga':active; }
+function openAdd(){ addModal.classList.add('open'); fSection.value=active==='All'?'Books':active; }
 function handleFile(f){ if(!f) return; const r=new FileReader(); r.onload=()=>{ window._coverData=r.result; previewImg.src=r.result; preview.style.display='block'; dropTxt.style.display='none'; }; r.readAsDataURL(f); }
 function readBook(){ const id=detailPage.dataset.id; const b=books.find(x=>x.id===id); if(b&&b.cover) window.open(b.cover,'_blank'); }
-function openExternal(){ const id=detailPage.dataset.id; const b=books.find(x=>x.id===id); let url=b.link; if(!url && b.sourceId){ if(b.sourceType==='mangadex') url=`https://mangadex.org/title/${b.sourceId}`; else if(b.sourceType==='anilist') url=`https://anilist.co/manga/${b.sourceId}`; else if(b.sourceType==='mal') url=`https://myanimelist.net/manga/${b.sourceId}`; } if(!url) url=`https://www.google.com/search?q=${encodeURIComponent(b.title+' read online')}`; window.open(url,'_blank'); }
+function openExternal(){ const id=detailPage.dataset.id; const b=books.find(x=>x.id===id); let url=b.link||`https://www.google.com/search?q=${encodeURIComponent(b.title+' '+b.section)}`; window.open(url,'_blank'); }
 async function openMangaReader(){
-  const id=detailPage.dataset.id; const b=books.find(x=>x.id===id); if(!b.sourceId || b.sourceType!=='mangadex'){ alert('No MangaDex ID, use Read Online'); return; }
+  const id=detailPage.dataset.id; const b=books.find(x=>x.id===id); if(!b.sourceId || b.sourceType!=='mangadex'){ alert('No MangaDex ID'); return; }
   mangaReaderPage.style.display='flex'; chapterLabel.textContent='Loading...';
-  try{
-    const r=await fetch(`https://api.mangadex.org/manga/${b.sourceId}/feed?limit=100&translatedLanguage[]=en&order[chapter]=asc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`);
-    const j=await r.json(); const chaps=j.data||[]; if(!chaps.length){ chapterLabel.textContent='No EN'; return; }
-    chapterSelect.innerHTML=''; chaps.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=`Ch ${c.attributes.chapter||'?'} ${c.attributes.title||''}`.slice(0,60); chapterSelect.appendChild(o); });
-    chapterSelect.value=chaps[chaps.length-1].id; loadChapter(chapterSelect.value);
-  }catch{ chapterLabel.textContent='Failed'; }
+  try{ const r=await fetch(`https://api.mangadex.org/manga/${b.sourceId}/feed?limit=100&translatedLanguage[]=en&order[chapter]=asc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`); const j=await r.json(); const chaps=j.data||[]; chapterSelect.innerHTML=''; chaps.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=`Ch ${c.attributes.chapter||'?'} ${c.attributes.title||''}`.slice(0,60); chapterSelect.appendChild(o); }); chapterSelect.value=chaps[chaps.length-1].id; loadChapter(chapterSelect.value); }catch{ chapterLabel.textContent='Failed'; }
 }
 function closeMangaReader(){ mangaReaderPage.style.display='none'; mangaPages.innerHTML=''; }
 async function loadChapter(chId){
   mangaPages.innerHTML='<div style="color:#fff;padding:40px">Loading...</div>';
-  try{
-    const r=await fetch(`https://api.mangadex.org/at-home/server/${chId}`); const j=await r.json();
-    const base=j.baseUrl, hash=j.chapter.hash, files=j.chapter.data; chapterLabel.textContent=`${files.length} pages`; mangaPages.innerHTML='';
-    files.forEach(f=>{ const img=document.createElement('img'); img.src=`${base}/data/${hash}/${f}`; img.style.cssText='max-width:700px;width:100%;height:auto;display:block;margin:0 auto'; img.loading='lazy'; mangaPages.appendChild(img); });
-  }catch{ mangaPages.innerHTML='<div style="color:#fff;padding:40px">Failed</div>'; }
+  try{ const r=await fetch(`https://api.mangadex.org/at-home/server/${chId}`); const j=await r.json(); const base=j.baseUrl, hash=j.chapter.hash, files=j.chapter.data; chapterLabel.textContent=`${files.length} pages`; mangaPages.innerHTML=''; files.forEach(f=>{ const img=document.createElement('img'); img.src=`${base}/data/${hash}/${f}`; img.style.cssText='max-width:700px;width:100%;height:auto;display:block'; img.loading='lazy'; mangaPages.appendChild(img); }); }catch{ mangaPages.innerHTML='<div style="color:#fff;padding:40px">Failed</div>'; }
 }
 async function load(){ await dbOpen(); books=await dbGetAll(); render(); }
 </script>
 <script>
-async function searchMangaDex(title){try{
-let url=`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`;
-let r=await fetch(url); let j=await r.json(); let list=j.data||[];
-return list.map(m=>{const a=m.attributes; const t=a.title?.en||Object.values(a.title||{})[0]||m.id; const rel=m.relationships.find(x=>x.type==='cover_art'); const cov=rel?.attributes?.fileName?`https://uploads.mangadex.org/covers/${m.id}/${rel.attributes.fileName}.256.jpg`:''; return {id:m.id,mal_id:null,anilist_id:null,title:t,year:a.year||'',cover:cov,desc:(a.description?.en||'').replace(/\[.*?]/g,'').slice(0,100),source:'MangaDex', link:`https://mangadex.org/title/${m.id}`};});
-}catch{return []}}
-
-async function searchAniList(title){try{
-const q=`query($s:String){Page(perPage:5){media(search:$s,type:MANGA,sort:SEARCH_MATCH){id idMal title{romaji english} coverImage{extraLarge large} startDate{year} description format siteUrl}}}`;
-const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})}); const j=await r.json(); const list=j?.data?.Page?.media||[];
-return list.map(m=>({id:m.idMal?null:m.id,mal_id:m.idMal||null,anilist_id:m.id,title:m.title.english||m.title.romaji, year:m.startDate?.year||'', cover:m.coverImage?.extraLarge||m.coverImage?.large||'', desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,100), source:`AniList • ${m.format||'MANGA'}`, link:m.siteUrl||`https://anilist.co/manga/${m.id}`}));
-}catch{return []}}
-
-async function searchJikan(title){try{
-const r=await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(title)}&limit=5&sfw=false&order_by=popularity&sort=desc`); const j=await r.json();
-if(!j?.data) return []; return j.data.map(m=>({id:null,mal_id:m.mal_id,anilist_id:null,title:m.title,year:m.published?.from?.slice(0,4)||'',cover:m.images?.jpg?.large_image_url||'',desc:(m.synopsis||'').slice(0,100),source:'MyAnimeList', link:m.url}));
-}catch{return []}}
-
-async function searchWikipedia(title){try{
-// Wikipedia search - works for EVERYTHING
-const r=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title+' book manga novel')}&format=json&origin=*&srlimit=8`);
-const j=await r.json(); const hits=j?.query?.search||[];
-// get thumbnails + page images
-const results=[];
-for(const h of hits){
-  let cover='';
-  try{
-    const imgR=await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(h.title)}&prop=pageimages&pithumbsize=400&format=json&origin=*`);
-    const imgJ=await imgR.json(); const pages=imgJ?.query?.pages||{}; const pg=Object.values(pages)[0]; cover=pg?.thumbnail?.source||'';
-  }catch{}
-  results.push({id:null,mal_id:null,anilist_id:null,title:h.title,year:'',cover:cover||`https://via.placeholder.com/300x400?text=${encodeURIComponent(h.title.slice(0,20))}`,desc:(h.snippet||'').replace(/<[^>]*>/g,'').slice(0,100),source:'Wikipedia', link:`https://en.wikipedia.org/wiki/${encodeURIComponent(h.title.replace(/ /g,'_'))}`});
-}
-return results;
-}catch{return []}}
-
-async function getSimilarAniList(title){try{
-const q=`query($s:String){Media(search:$s,type:MANGA){recommendations(perPage:8,sort:RATING_DESC){nodes{mediaRecommendation{title{romaji english} coverImage{large} startDate{year} format description siteUrl}}}}}`;
-const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})}); const j=await r.json(); const recs=j?.data?.Media?.recommendations?.nodes||[];
-return recs.map(n=>{const m=n.mediaRecommendation; if(!m) return null; return {id:null,mal_id:null,anilist_id:null,title:m.title.english||m.title.romaji,year:m.startDate?.year||'',cover:m.coverImage?.large||'',desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,80),source:`Similar • ${m.format||''}`, link:m.siteUrl||''}}).filter(Boolean);
-}catch{return []}}
-
-function selectResult(r){
-  fTitle.value=r.title||''; fYear.value=r.year||''; fDesc.value=r.desc||''; fLink.value=r.link||''; window._coverData=r.cover||''; window._pendingSource=r;
-  previewImg.src=r.cover||''; preview.style.display=r.cover?'block':'none'; dropTxt.style.display=r.cover?'none':'block';
-  resultsPage.classList.remove('open'); addModal.classList.add('open');
-}
-
+async function searchMangaDex(title){try{let r=await fetch(`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`);let j=await r.json();return (j.data||[]).map(m=>{const a=m.attributes;const t=a.title?.en||Object.values(a.title||{})[0]||m.id;const rel=m.relationships.find(x=>x.type==='cover_art');const cov=rel?.attributes?.fileName?`https://uploads.mangadex.org/covers/${m.id}/${rel.attributes.fileName}.256.jpg`:'';return{id:m.id,title:t,year:a.year||'',cover:cov,desc:(a.description?.en||'').replace(/\[.*?]/g,'').slice(0,100),source:'MangaDex',link:`https://mangadex.org/title/${m.id}`,type:'mangadex'}})}catch{return[]}}
+async function searchAniList(type,title){try{const q=`query($s:String){Page(perPage:5){media(search:$s,type:${type},sort:SEARCH_MATCH){id title{romaji english} coverImage{extraLarge large} startDate{year} description format siteUrl}}}`;let r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})});let j=await r.json();return (j?.data?.Page?.media||[]).map(m=>({id:m.id,title:m.title.english||m.title.romaji,year:m.startDate?.year||'',cover:m.coverImage?.extraLarge||m.coverImage?.large||'',desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,100),source:`AniList • ${type}`,link:m.siteUrl,type:'anilist'}))}catch{return[]}}
+async function searchOpenLibrary(title){try{let r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(title)}&limit=6`);let j=await r.json();return (j?.docs||[]).map(d=>({title:d.title,year:d.first_publish_year||'',cover:d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg`:'',desc:(d.author_name?`by ${d.author_name.join(', ')}`:'').slice(0,100),source:'Open Library',link:`https://openlibrary.org${d.key}`,type:'book'}))}catch{return[]}}
+async function searchWikipedia(title,filter){try{let r=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title+' '+filter)}&format=json&origin=*&srlimit=6`);let j=await r.json();let out=[];for(const h of (j?.query?.search||[])){let cov='';try{let ir=await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(h.title)}&prop=pageimages&pithumbsize=400&format=json&origin=*`);let ij=await ir.json();cov=Object.values(ij?.query?.pages||{})[0]?.thumbnail?.source||''}catch{};out.push({title:h.title,year:'',cover:cov,desc:h.snippet.replace(/<[^>]*>/g,'').slice(0,100),source:`Wikipedia • ${filter}`,link:`https://en.wikipedia.org/wiki/${encodeURIComponent(h.title.replace(/ /g,'_'))}`,type:'wikipedia'})}return out}catch{return[]}}
+function selectResult(r){fTitle.value=r.title||'';fYear.value=r.year||'';fDesc.value=r.desc||'';fLink.value=r.link||'';window._coverData=r.cover||'';window._pendingSource=r;previewImg.src=r.cover||'';preview.style.display=r.cover?'block':'none';dropTxt.style.display=r.cover?'none':'block';resultsPage.classList.remove('open');addModal.classList.add('open');}
 fetchBtn.onclick=async()=>{
-  const title=fTitle.value.trim(); if(!title) return alert('Enter title'); fetchBtn.textContent='Searching...';
-  let all=[];
-  const [ani,mdx,jik]=await Promise.all([searchAniList(title),searchMangaDex(title),searchJikan(title)]);
-  all=all.concat(ani).concat(mdx).concat(jik);
-
-  // WIKIPEDIA FALLBACK - if nothing found or less than 3 results, add Wikipedia
-  if(all.length < 3){
-    const wiki=await searchWikipedia(title);
-    all=all.concat(wiki);
-  }
-
-  const seen=new Set(); const dedup=[];
-  for(const r of all){const k=(r.title||'').toLowerCase().trim(); if(!seen.has(k)&&r.title){seen.add(k); dedup.push(r);}}
-
-  fetchBtn.textContent='🔍 Search Google'; const rp=resultsPage; const grid=resultsGrid; grid.innerHTML='';
-  resultsLabel.textContent=`${dedup.length} RESULTS FOR "${title.toUpperCase()}"`;
-  if(!dedup.length){
-    // LAST RESORT - even Wikipedia failed, force wikipedia link
-    const d=document.createElement('div'); d.className='resCard';
-    d.innerHTML=`<div style="flex:1"><div style="font-weight:600">No API results, but try Wikipedia</div><div class="mono" style="font-size:11px;color:var(--muted)">Open Wikipedia for "${title}"</div></div><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Open</span>`;
-    d.onclick=()=>window.open(`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(title)}`,'_blank');
-    grid.appendChild(d); resultsHint.textContent=`Wikipedia fallback`; rp.classList.add('open'); return;
-  }
-  resultsHint.textContent=`Exact + Similar + Wikipedia fallback`;
-  const exactTitle=document.createElement('div'); exactTitle.className='mono small-caps'; exactTitle.style.marginTop='10px'; exactTitle.textContent='Exact results'; grid.appendChild(exactTitle);
-  dedup.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.src='https://via.placeholder.com/56x80?text=No+Img'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><div style="align-self:center"><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
-
-  // Similar
-  const first=dedup.find(x=>x.source!=='Wikipedia')||dedup[0];
-  let similar=[]; if(first?.title){ const simAni=await getSimilarAniList(first.title); similar=similar.concat(simAni); }
-  if(similar.length){
-    const simTitle=document.createElement('div'); simTitle.className='mono small-caps'; simTitle.style.marginTop='24px'; simTitle.textContent=`Similar to "${first.title}"`; grid.appendChild(simTitle);
-    similar.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.style.opacity='0.92'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><div style="align-self:center"><span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
-  }
-  rp.classList.add('open'); addModal.classList.remove('open');
+  const title=fTitle.value.trim(); if(!title) return alert('Enter title'); const section=fSection.value;
+  fetchBtn.textContent='Searching '+section+'...'; let all=[];
+  if(section==='Manga'||section==='Manwha'){ const [a,b]=await Promise.all([searchMangaDex(title),searchAniList('MANGA',title)]); all=[...a,...b]; if(all.length<3) all=[...all,...(await searchWikipedia(title,'manga'))]; }
+  else if(section==='Films'){ const [w,a]=await Promise.all([searchWikipedia(title,'film'),searchAniList('ANIME',title)]); all=[...w,...a]; }
+  else if(section==='Books'||section==='Novel'){ const [o,w]=await Promise.all([searchOpenLibrary(title),searchWikipedia(title,'book')]); all=[...o,...w]; }
+  else { const [m,o,w]=await Promise.all([searchMangaDex(title),searchOpenLibrary(title),searchWikipedia(title,'')]); all=[...m,...o,...w]; }
+  const seen=new Set(); const dedup=[]; for(const r of all){const k=(r.title||'').toLowerCase().trim(); if(!seen.has(k)&&r.title){seen.add(k); dedup.push(r);}}
+  fetchBtn.textContent='🔍 Search'; resultsGrid.innerHTML=''; resultsLabel.textContent=`${dedup.length} RESULTS FOR "${title.toUpperCase()}" IN ${section.toUpperCase()}`; resultsHint.textContent=`Searching as: ${section} — change section above to change DB`;
+  dedup.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Pick</span>`; d.onclick=()=>selectResult(r); resultsGrid.appendChild(d);});
+  resultsPage.classList.add('open'); addModal.classList.remove('open');
 };
-
 saveAdd.onclick=async()=>{
-  const title=fTitle.value.trim(); if(!title) return alert('Title required'); let cover=window._coverData; if(!cover){alert('Pick a cover first'); return;}
+  const title=fTitle.value.trim(); if(!title) return alert('Title required'); let cover=window._coverData; if(!cover){alert('Pick cover'); return;}
   const saveSection=fSection.value; const src=window._pendingSource||{};
-  const nb={id:Date.now().toString(),title,section:saveSection,type:fType.value,cover,description:fDesc.value,tags:'',link:fLink.value||src.link||'',year:fYear.value,size:0,status:'want',fav:false,file:false,source:src.source||'Search', sourceType: src.id?'mangadex': src.anilist_id?'anilist': src.mal_id?'mal': src.source==='Wikipedia'?'wikipedia':'google', sourceId: src.id||src.anilist_id||src.mal_id||''};
-  books.push(nb); await dbPut(STORE,nb);
-  active=saveSection; search=''; q.value=''; currentLabel.textContent=active.toUpperCase()+' • LIBRARY';
-  addModal.classList.remove('open'); window._coverData=null; window._pendingSource=null; preview.style.display='none'; dropTxt.style.display='block'; fTitle.value=''; fDesc.value=''; render();
+  const nb={id:Date.now().toString(),title,section:saveSection,type:saveSection,cover,description:fDesc.value,link:fLink.value||src.link||'',year:fYear.value,size:0,file:false,source:src.source||'Search',sourceType:src.type||'',sourceId:src.id||''};
+  books.push(nb); await dbPut(STORE,nb); active=saveSection; currentLabel.textContent=active.toUpperCase()+' • LIBRARY'; addModal.classList.remove('open'); window._coverData=null; window._pendingSource=null; preview.style.display='none'; dropTxt.style.display='block'; fTitle.value=''; fDesc.value=''; render();
 };
 load();
 </script></body></html>

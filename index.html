@@ -114,19 +114,93 @@ document.getElementById('ownerUnlock').onclick=()=>{const p=document.getElementB
 document.getElementById('addSec').onclick=async()=>{if(!isOwner) return alert('Owner only'); const n=document.getElementById('newSec').value.trim(); if(!n) return; const ns={id:Date.now().toString(),name:n,type:document.getElementById('newType').value}; sections.push(ns); await dbPut(S_STORE,ns); document.getElementById('newSec').value=''; render();};
   </script>
   <script>
-async function searchMangaDex(title){try{const url=`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`; const r=await fetch(url); if(!r.ok) return []; const j=await r.json(); if(!j.data) return []; return j.data.map(m=>{const a=m.attributes; const t=a.title?.en||Object.values(a.title||{})[0]||m.id; const rel=m.relationships.find(x=>x.type==='cover_art'); const cov=rel?.attributes?.fileName?`https://uploads.mangadex.org/covers/${m.id}/${rel.attributes.fileName}.256.jpg`:''; return {title:t,year:a.year||'',cover:cov,desc:(a.description?.en||'').replace(/\[.*?]/g,'').slice(0,140),source:'MangaDex'};});}catch{return []}}
-async function searchAniList(title){try{const q=`query($s:String){Page(perPage:5){media(search:$s,type:MANGA,sort:POPULARITY_DESC){title{romaji english native} coverImage{extraLarge large} startDate{year} description format}}}`; const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})}); const j=await r.json(); const list=j?.data?.Page?.media||[]; return list.map(m=>({title:m.title.english||m.title.romaji, year:m.startDate?.year||'', cover:m.coverImage?.extraLarge||m.coverImage?.large||'', desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,130), source:`AniList • ${m.format||'MANGA'}`}));}catch{return []}}
+async function searchMangaDex(title){try{
+let url=`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`;
+let r=await fetch(url); let j=await r.json(); let list=j.data||[];
+if(!list.length && title.split(' ').length>1){
+  let kw=title.split(' ').find(w=>w.length>3)||title;
+  url=`https://api.mangadex.org/manga?title=${encodeURIComponent(kw)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`;
+  r=await fetch(url); j=await r.json(); list=j.data||[];
+}
+return list.map(m=>{const a=m.attributes; const t=a.title?.en||Object.values(a.title||{})[0]||m.id; const rel=m.relationships.find(x=>x.type==='cover_art'); const cov=rel?.attributes?.fileName?`https://uploads.mangadex.org/covers/${m.id}/${rel.attributes.fileName}.256.jpg`:''; return {id:m.id,mal_id:null,anilist_id:null,title:t,year:a.year||'',cover:cov,desc:(a.description?.en||'').replace(/\[.*?]/g,'').slice(0,100),source:'MangaDex'};});
+}catch{return []}}
+
+async function searchAniList(title){try{
+const q=`query($s:String){Page(perPage:5){media(search:$s,type:MANGA,sort:SEARCH_MATCH){id title{romaji english} coverImage{extraLarge large} startDate{year} description format}}}`;
+const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})});
+const j=await r.json(); const list=j?.data?.Page?.media||[];
+return list.map(m=>({id:null,mal_id:m.idMal||null,anilist_id:m.id,title:m.title.english||m.title.romaji, year:m.startDate?.year||'', cover:m.coverImage?.extraLarge||m.coverImage?.large||'', desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,100), source:`AniList • ${m.format||'MANGA'}`}));
+}catch{return []}}
+
+async function searchJikan(title){try{
+const tf=async(u)=>{try{const r=await fetch(u); if(!r.ok) return null; return await r.json();}catch{return null}};
+const j=await tf(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(title)}&limit=5&sfw=false&order_by=popularity&sort=desc`);
+if(!j?.data) return [];
+return j.data.map(m=>({id:null,mal_id:m.mal_id,anilist_id:null,title:m.title,year:m.published?.from?.slice(0,4)||'',cover:m.images?.jpg?.large_image_url||'',desc:(m.synopsis||'').slice(0,100),source:'MyAnimeList'}));
+}catch{return []}}
+
+async function getSimilarAniList(title){
+try{
+const q=`query($s:String){Media(search:$s,type:MANGA){recommendations(perPage:8,sort:RATING_DESC){nodes{mediaRecommendation{title{romaji english} coverImage{large} startDate{year} format description}}}}}`;
+const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})});
+const j=await r.json(); const recs=j?.data?.Media?.recommendations?.nodes||[];
+return recs.map(n=>{const m=n.mediaRecommendation; if(!m) return null; return {title:m.title.english||m.title.romaji,year:m.startDate?.year||'',cover:m.coverImage?.large||'',desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,80),source:`Similar • ${m.format||''}`}}).filter(Boolean);
+}catch{return []}}
+
+async function getSimilarJikan(mal_id){
+try{
+const r=await fetch(`https://api.jikan.moe/v4/manga/${mal_id}/recommendations`);
+const j=await r.json(); const list=j?.data||[];
+return list.slice(0,8).map(x=>{const m=x.entry; return {title:m.title,year:'',cover:m.images?.jpg?.large_image_url||'',desc:'',source:'Similar • MAL'}});
+}catch{return []}}
+
 document.getElementById('fetchBtn').onclick=async()=>{
   const title=document.getElementById('fTitle').value.trim(); if(!title) return alert('Enter title'); const btn=document.getElementById('fetchBtn'); btn.textContent='Searching...';
-  const tf=async(u)=>{try{const r=await fetch(u); if(!r.ok) return null; return await r.json();}catch{return null}};
-  let all=[]; const [ani,mdx]=await Promise.all([searchAniList(title),searchMangaDex(title)]); all=all.concat(ani).concat(mdx);
-  try{const j=await tf(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(title)}&limit=3`); if(j?.data) for(const m of j.data) all.push({title:m.title,year:m.published?.from?.slice(0,4)||'',cover:m.images?.jpg?.large_image_url||'',desc:(m.synopsis||'').slice(0,120),source:'MyAnimeList'});}catch{}
-  try{const j=await tf(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=3`); if(j?.docs) for(const d of j.docs){const cov=d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`:''; all.push({title:d.title,year:d.first_publish_year||'',cover:cov,desc:(d.author_name||[]).join(', '),source:'Open Library • Japanese Book / Novel'});} }catch{}
-  try{const j=await tf(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(title)}&maxResults=3`); if(j?.items) for(const it of j.items){const b=it.volumeInfo; all.push({title:b.title,year:b.publishedDate?.slice(0,4)||'',cover:b.imageLinks?.thumbnail?.replace('http:','https:')||'',desc:(b.description||'').slice(0,100),source:'Google Books • Novel'});} }catch{}
-  try{const j=await tf(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(title)}`); if(j) for(const it of j.slice(0,2)){const s=it.show; all.push({title:s.name,year:s.premiered?.slice(0,4)||'',cover:s.image?.medium||'',desc:(s.summary||'').replace(/<[^>]*>/g,'').slice(0,100),source:'TVMaze • Drama'});} }catch{}
-  const seen=new Set(); const dedup=[]; for(const r of all){const k=(r.title||'').toLowerCase(); if(!seen.has(k)&&r.title){seen.add(k); dedup.push(r);}}
-  btn.textContent='🔍 Search Google'; const rp=document.getElementById('resultsPage'); const grid=document.getElementById('resultsGrid'); grid.innerHTML=''; document.getElementById('resultsLabel').textContent=`${dedup.length} RESULTS FOR "${title.toUpperCase()}"`; if(!dedup.length){document.getElementById('resultsHint').textContent=`No results`; rp.classList.add('open'); return;} document.getElementById('resultsHint').textContent=`Found ${dedup.length} — Manga / Manhwa / Book / Novel / Japanese book Heaven`; dedup.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}${r.desc?' · '+r.desc.slice(0,70):''}</div></div><div style="align-self:center"><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);}); rp.classList.add('open'); document.getElementById('addModal').classList.remove('open');
+  let all=[];
+  const [ani,mdx,jik]=await Promise.all([searchAniList(title),searchMangaDex(title),searchJikan(title)]);
+  all=all.concat(ani).concat(mdx).concat(jik);
+  const seen=new Set(); const dedup=[]; for(const r of all){const k=(r.title||'').toLowerCase().trim(); if(!seen.has(k)&&r.title){seen.add(k); dedup.push(r);}}
+  btn.textContent='🔍 Search Google';
+  const rp=document.getElementById('resultsPage'); const grid=document.getElementById('resultsGrid'); grid.innerHTML='';
+  document.getElementById('resultsLabel').textContent=`${dedup.length} RESULTS FOR "${title.toUpperCase()}"`;
+  if(!dedup.length){document.getElementById('resultsHint').textContent=`No results`; rp.classList.add('open'); return;}
+  document.getElementById('resultsHint').textContent=`Exact match + Similar manga`;
+  // EXACT
+  const exactTitle=document.createElement('div'); exactTitle.className='mono small-caps'; exactTitle.style.marginTop='10px'; exactTitle.textContent='Exact results'; grid.appendChild(exactTitle);
+  dedup.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}${r.desc?' · '+r.desc.slice(0,60):''}</div></div><div style="align-self:center"><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
+
+  // SIMILAR - based on first result
+  const first=dedup[0];
+  let similar=[];
+  if(first?.anilist_id || first?.title){
+    const simAni=await getSimilarAniList(first.title);
+    similar=similar.concat(simAni);
+  }
+  if(first?.mal_id){
+    const simJik=await getSimilarJikan(first.mal_id);
+    similar=similar.concat(simJik);
+  }
+  // if still empty, search with genre keywords
+  if(!similar.length){
+    const kw=first.title.split(' ').slice(0,2).join(' ');
+    const more=await searchJikan(kw);
+    similar=more.slice(1,6).map(x=>({...x,source:'Similar • keyword'}));
+  }
+  if(similar.length){
+    const simTitle=document.createElement('div'); simTitle.className='mono small-caps'; simTitle.style.marginTop='24px'; simTitle.textContent=`Similar to "${first.title}"`; grid.appendChild(simTitle);
+    similar.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.style.opacity='0.92'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}${r.desc?' · '+r.desc.slice(0,60):''}</div></div><div style="align-self:center"><span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
+  }
+  rp.classList.add('open'); document.getElementById('addModal').classList.remove('open');
 };
-document.getElementById('saveAdd').onclick=async()=>{const title=document.getElementById('fTitle').value.trim(); if(!title) return alert('Title required'); let cover=window._coverData; if(!cover){alert('Pick a cover — click Search Google first, or upload'); return;} const nb={id:Date.now().toString(),title,section:document.getElementById('fSection').value,type:document.getElementById('fType').value,cover,description:document.getElementById('fDesc').value,tags:'',link:document.getElementById('fLink').value,year:document.getElementById('fYear').value,size:0,status:'want',fav:false}; books.push(nb); await dbPut(STORE,nb); document.getElementById('addModal').classList.remove('open'); window._coverData=null; document.getElementById('preview').style.display='none'; document.getElementById('dropTxt').style.display='block'; document.getElementById('fTitle').value=''; document.getElementById('fDesc').value=''; render();};
+
+document.getElementById('saveAdd').onclick=async()=>{
+  const title=document.getElementById('fTitle').value.trim(); if(!title) return alert('Title required');
+  let cover=window._coverData; if(!cover){alert('Pick a cover first'); return;}
+  const saveSection=document.getElementById('fSection').value;
+  const nb={id:Date.now().toString(),title,section:saveSection,type:document.getElementById('fType').value,cover,description:document.getElementById('fDesc').value,tags:'',link:document.getElementById('fLink').value,year:document.getElementById('fYear').value,size:0,status:'want',fav:false};
+  books.push(nb); await dbPut(STORE,nb);
+  active=saveSection; search=''; document.getElementById('q').value=''; document.getElementById('currentLabel').textContent=active.toUpperCase();
+  document.getElementById('addModal').classList.remove('open'); window._coverData=null; document.getElementById('preview').style.display='none'; document.getElementById('dropTxt').style.display='block'; document.getElementById('fTitle').value=''; document.getElementById('fDesc').value=''; render();
+};
 load();
 </script></body></html>

@@ -157,48 +157,91 @@ async function load(){ await dbOpen(); books=await dbGetAll(); render(); }
 async function searchMangaDex(title){try{
 let url=`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`;
 let r=await fetch(url); let j=await r.json(); let list=j.data||[];
-if(!list.length && title.split(' ').length>1){ let kw=title.split(' ').find(w=>w.length>3)||title; url=`https://api.mangadex.org/manga?title=${encodeURIComponent(kw)}&limit=5&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=cover_art&order[relevance]=desc`; r=await fetch(url); j=await r.json(); list=j.data||[]; }
-return list.map(m=>{const a=m.attributes; const t=a.title?.en||Object.values(a.title||{})[0]||m.id; const rel=m.relationships.find(x=>x.type==='cover_art'); const cov=rel?.attributes?.fileName?`https://uploads.mangadex.org/covers/${m.id}/${rel.attributes.fileName}.256.jpg`:''; return {id:m.id,mal_id:null,anilist_id:null,title:t,year:a.year||'',cover:cov,desc:(a.description?.en||'').replace(/\[.*?]/g,'').slice(0,100),source:'MangaDex'};});
+return list.map(m=>{const a=m.attributes; const t=a.title?.en||Object.values(a.title||{})[0]||m.id; const rel=m.relationships.find(x=>x.type==='cover_art'); const cov=rel?.attributes?.fileName?`https://uploads.mangadex.org/covers/${m.id}/${rel.attributes.fileName}.256.jpg`:''; return {id:m.id,mal_id:null,anilist_id:null,title:t,year:a.year||'',cover:cov,desc:(a.description?.en||'').replace(/\[.*?]/g,'').slice(0,100),source:'MangaDex', link:`https://mangadex.org/title/${m.id}`};});
 }catch{return []}}
+
 async function searchAniList(title){try{
-const q=`query($s:String){Page(perPage:5){media(search:$s,type:MANGA,sort:SEARCH_MATCH){id idMal title{romaji english} coverImage{extraLarge large} startDate{year} description format}}}`;
+const q=`query($s:String){Page(perPage:5){media(search:$s,type:MANGA,sort:SEARCH_MATCH){id idMal title{romaji english} coverImage{extraLarge large} startDate{year} description format siteUrl}}}`;
 const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})}); const j=await r.json(); const list=j?.data?.Page?.media||[];
-return list.map(m=>({id:m.idMal?null:m.id,mal_id:m.idMal||null,anilist_id:m.id,title:m.title.english||m.title.romaji, year:m.startDate?.year||'', cover:m.coverImage?.extraLarge||m.coverImage?.large||'', desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,100), source:`AniList • ${m.format||'MANGA'}`}));
+return list.map(m=>({id:m.idMal?null:m.id,mal_id:m.idMal||null,anilist_id:m.id,title:m.title.english||m.title.romaji, year:m.startDate?.year||'', cover:m.coverImage?.extraLarge||m.coverImage?.large||'', desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,100), source:`AniList • ${m.format||'MANGA'}`, link:m.siteUrl||`https://anilist.co/manga/${m.id}`}));
 }catch{return []}}
+
 async function searchJikan(title){try{
 const r=await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(title)}&limit=5&sfw=false&order_by=popularity&sort=desc`); const j=await r.json();
-if(!j?.data) return []; return j.data.map(m=>({id:null,mal_id:m.mal_id,anilist_id:null,title:m.title,year:m.published?.from?.slice(0,4)||'',cover:m.images?.jpg?.large_image_url||'',desc:(m.synopsis||'').slice(0,100),source:'MyAnimeList'}));
+if(!j?.data) return []; return j.data.map(m=>({id:null,mal_id:m.mal_id,anilist_id:null,title:m.title,year:m.published?.from?.slice(0,4)||'',cover:m.images?.jpg?.large_image_url||'',desc:(m.synopsis||'').slice(0,100),source:'MyAnimeList', link:m.url}));
 }catch{return []}}
+
+async function searchWikipedia(title){try{
+// Wikipedia search - works for EVERYTHING
+const r=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title+' book manga novel')}&format=json&origin=*&srlimit=8`);
+const j=await r.json(); const hits=j?.query?.search||[];
+// get thumbnails + page images
+const results=[];
+for(const h of hits){
+  let cover='';
+  try{
+    const imgR=await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(h.title)}&prop=pageimages&pithumbsize=400&format=json&origin=*`);
+    const imgJ=await imgR.json(); const pages=imgJ?.query?.pages||{}; const pg=Object.values(pages)[0]; cover=pg?.thumbnail?.source||'';
+  }catch{}
+  results.push({id:null,mal_id:null,anilist_id:null,title:h.title,year:'',cover:cover||`https://via.placeholder.com/300x400?text=${encodeURIComponent(h.title.slice(0,20))}`,desc:(h.snippet||'').replace(/<[^>]*>/g,'').slice(0,100),source:'Wikipedia', link:`https://en.wikipedia.org/wiki/${encodeURIComponent(h.title.replace(/ /g,'_'))}`});
+}
+return results;
+}catch{return []}}
+
 async function getSimilarAniList(title){try{
-const q=`query($s:String){Media(search:$s,type:MANGA){recommendations(perPage:8,sort:RATING_DESC){nodes{mediaRecommendation{title{romaji english} coverImage{large} startDate{year} format description}}}}}`;
+const q=`query($s:String){Media(search:$s,type:MANGA){recommendations(perPage:8,sort:RATING_DESC){nodes{mediaRecommendation{title{romaji english} coverImage{large} startDate{year} format description siteUrl}}}}}`;
 const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{s:title}})}); const j=await r.json(); const recs=j?.data?.Media?.recommendations?.nodes||[];
-return recs.map(n=>{const m=n.mediaRecommendation; if(!m) return null; return {id:null,mal_id:null,anilist_id:null,title:m.title.english||m.title.romaji,year:m.startDate?.year||'',cover:m.coverImage?.large||'',desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,80),source:`Similar • ${m.format||''}`}}).filter(Boolean);
+return recs.map(n=>{const m=n.mediaRecommendation; if(!m) return null; return {id:null,mal_id:null,anilist_id:null,title:m.title.english||m.title.romaji,year:m.startDate?.year||'',cover:m.coverImage?.large||'',desc:(m.description||'').replace(/<[^>]*>/g,'').slice(0,80),source:`Similar • ${m.format||''}`, link:m.siteUrl||''}}).filter(Boolean);
 }catch{return []}}
-async function getSimilarJikan(mal_id){try{
-const r=await fetch(`https://api.jikan.moe/v4/manga/${mal_id}/recommendations`); const j=await r.json(); const list=j?.data||[];
-return list.slice(0,8).map(x=>{const m=x.entry; return {id:null,mal_id:m.mal_id,title:m.title,year:'',cover:m.images?.jpg?.large_image_url||'',desc:'',source:'Similar • MAL'}});
-}catch{return []}}
+
 function selectResult(r){
-  fTitle.value=r.title||''; fYear.value=r.year||''; fDesc.value=r.desc||''; window._coverData=r.cover||''; window._pendingSource=r;
+  fTitle.value=r.title||''; fYear.value=r.year||''; fDesc.value=r.desc||''; fLink.value=r.link||''; window._coverData=r.cover||''; window._pendingSource=r;
   previewImg.src=r.cover||''; preview.style.display=r.cover?'block':'none'; dropTxt.style.display=r.cover?'none':'block';
   resultsPage.classList.remove('open'); addModal.classList.add('open');
 }
+
 fetchBtn.onclick=async()=>{
   const title=fTitle.value.trim(); if(!title) return alert('Enter title'); fetchBtn.textContent='Searching...';
-  let all=[]; const [ani,mdx,jik]=await Promise.all([searchAniList(title),searchMangaDex(title),searchJikan(title)]); all=all.concat(ani).concat(mdx).concat(jik);
-  const seen=new Set(); const dedup=[]; for(const r of all){const k=(r.title||'').toLowerCase().trim(); if(!seen.has(k)&&r.title){seen.add(k); dedup.push(r);}}
+  let all=[];
+  const [ani,mdx,jik]=await Promise.all([searchAniList(title),searchMangaDex(title),searchJikan(title)]);
+  all=all.concat(ani).concat(mdx).concat(jik);
+
+  // WIKIPEDIA FALLBACK - if nothing found or less than 3 results, add Wikipedia
+  if(all.length < 3){
+    const wiki=await searchWikipedia(title);
+    all=all.concat(wiki);
+  }
+
+  const seen=new Set(); const dedup=[];
+  for(const r of all){const k=(r.title||'').toLowerCase().trim(); if(!seen.has(k)&&r.title){seen.add(k); dedup.push(r);}}
+
   fetchBtn.textContent='🔍 Search Google'; const rp=resultsPage; const grid=resultsGrid; grid.innerHTML='';
-  resultsLabel.textContent=`${dedup.length} RESULTS FOR "${title.toUpperCase()}"`; if(!dedup.length){resultsHint.textContent=`No results`; rp.classList.add('open'); return;}
-  resultsHint.textContent=`Exact + Similar`; const exactTitle=document.createElement('div'); exactTitle.className='mono small-caps'; exactTitle.style.marginTop='10px'; exactTitle.textContent='Exact results'; grid.appendChild(exactTitle);
-  dedup.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><div style="align-self:center"><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
-  const first=dedup[0]; let similar=[]; if(first?.title){ const simAni=await getSimilarAniList(first.title); similar=similar.concat(simAni); } if(first?.mal_id){ const simJik=await getSimilarJikan(first.mal_id); similar=similar.concat(simJik); }
-  if(similar.length){ const simTitle=document.createElement('div'); simTitle.className='mono small-caps'; simTitle.style.marginTop='24px'; simTitle.textContent=`Similar to "${first.title}"`; grid.appendChild(simTitle); similar.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.style.opacity='0.92'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><div style="align-self:center"><span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);}); }
+  resultsLabel.textContent=`${dedup.length} RESULTS FOR "${title.toUpperCase()}"`;
+  if(!dedup.length){
+    // LAST RESORT - even Wikipedia failed, force wikipedia link
+    const d=document.createElement('div'); d.className='resCard';
+    d.innerHTML=`<div style="flex:1"><div style="font-weight:600">No API results, but try Wikipedia</div><div class="mono" style="font-size:11px;color:var(--muted)">Open Wikipedia for "${title}"</div></div><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Open</span>`;
+    d.onclick=()=>window.open(`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(title)}`,'_blank');
+    grid.appendChild(d); resultsHint.textContent=`Wikipedia fallback`; rp.classList.add('open'); return;
+  }
+  resultsHint.textContent=`Exact + Similar + Wikipedia fallback`;
+  const exactTitle=document.createElement('div'); exactTitle.className='mono small-caps'; exactTitle.style.marginTop='10px'; exactTitle.textContent='Exact results'; grid.appendChild(exactTitle);
+  dedup.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.src='https://via.placeholder.com/56x80?text=No+Img'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><div style="align-self:center"><span style="background:#111;color:#fff;border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
+
+  // Similar
+  const first=dedup.find(x=>x.source!=='Wikipedia')||dedup[0];
+  let similar=[]; if(first?.title){ const simAni=await getSimilarAniList(first.title); similar=similar.concat(simAni); }
+  if(similar.length){
+    const simTitle=document.createElement('div'); simTitle.className='mono small-caps'; simTitle.style.marginTop='24px'; simTitle.textContent=`Similar to "${first.title}"`; grid.appendChild(simTitle);
+    similar.forEach(r=>{const d=document.createElement('div'); d.className='resCard'; d.style.opacity='0.92'; d.innerHTML=`<img src="${r.cover||''}" style="width:56px;height:80px;object-fit:cover;border-radius:10px;background:var(--soft)" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-weight:600;font-size:14px">${r.title}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">${r.year||''} · ${r.source}</div></div><div style="align-self:center"><span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px">Pick</span></div>`; d.onclick=()=>selectResult(r); grid.appendChild(d);});
+  }
   rp.classList.add('open'); addModal.classList.remove('open');
 };
+
 saveAdd.onclick=async()=>{
   const title=fTitle.value.trim(); if(!title) return alert('Title required'); let cover=window._coverData; if(!cover){alert('Pick a cover first'); return;}
   const saveSection=fSection.value; const src=window._pendingSource||{};
-  const nb={id:Date.now().toString(),title,section:saveSection,type:fType.value,cover,description:fDesc.value,tags:'',link:fLink.value||'',year:fYear.value,size:0,status:'want',fav:false,file:false,source:src.source||'Search', sourceType: src.id?'mangadex': src.anilist_id?'anilist': src.mal_id?'mal':'google', sourceId: src.id||src.anilist_id||src.mal_id||''};
+  const nb={id:Date.now().toString(),title,section:saveSection,type:fType.value,cover,description:fDesc.value,tags:'',link:fLink.value||src.link||'',year:fYear.value,size:0,status:'want',fav:false,file:false,source:src.source||'Search', sourceType: src.id?'mangadex': src.anilist_id?'anilist': src.mal_id?'mal': src.source==='Wikipedia'?'wikipedia':'google', sourceId: src.id||src.anilist_id||src.mal_id||''};
   books.push(nb); await dbPut(STORE,nb);
   active=saveSection; search=''; q.value=''; currentLabel.textContent=active.toUpperCase()+' • LIBRARY';
   addModal.classList.remove('open'); window._coverData=null; window._pendingSource=null; preview.style.display='none'; dropTxt.style.display='block'; fTitle.value=''; fDesc.value=''; render();
